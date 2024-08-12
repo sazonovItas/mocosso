@@ -1,0 +1,19 @@
+name: lint
+on: [push, pull_request]
+
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: latest
+
+      - name: golangci-lint checks
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+          args: --config ./.golangci.yml ./...

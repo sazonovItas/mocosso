@@ -1,0 +1,89 @@
+version: "3.8"
+
+services:
+  sso:
+    container_name: sso-service
+    hostname: sso-service
+    build:
+      context: .
+      dockerfile: ./deploy/docker/sso.Dockerfile
+
+    restart: unless-stopped
+
+    networks:
+      sso-common-network:
+
+
+    logging:
+      options:
+        max-size: "100k"
+        max-file: "3"
+
+  migrator:
+    container_name: go-migrator
+    hostname: go-migrator
+    build:
+      context: .
+      dockerfile: ./deploy/docker/migrator.Dockerfile
+
+    volumes:
+      - "./migrations:/migrations"
+
+    networks:
+      sso-common-network:
+
+
+    command: [ "-path", "/migrations", "-database", "postgres://itas:password@test_db:5432/mixery?sslmode=disable", "up" ]
+
+    depends_on:
+      test_db:
+        condition: service_healthy
+        restart: true
+
+  db:
+    image: postgres:alpine
+    container_name: sso-service-db
+    restart: unless-stopped
+
+    networks:
+      sso-common-network:
+
+
+    volumes:
+      - "sso-data:/var/lib/postgresql/data"
+    # healthcheck:
+    #  test: [ "CMD-SHELL", "pg_isready", "-d", "${POSTGRES_URI}" ]
+    #  interval: 10s
+    #  timeout: 5s
+    #  retries: 3
+
+  test_db:
+    image: postgres:alpine
+    container_name: test-db
+    restart: unless-stopped
+
+    networks:
+      sso-common-network:
+
+
+    ports:
+      - "5432:5432"
+
+    environment:
+      POSTGRES_DB: "mixery"
+      POSTGRES_USER: "itas"
+      POSTGRES_PASSWORD: "password"
+
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready", "-d", "postgres://itas:password@localhost:5432/mixery?sslmode=disable" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+networks:
+  sso-common-network:
+    name: "sso-common-network"
+
+volumes:
+  sso-data:
+    name: "sso-data"

@@ -1,0 +1,7 @@
+.git**
+workflows
+
+bin
+Makefile
+
+docker-compose.yaml

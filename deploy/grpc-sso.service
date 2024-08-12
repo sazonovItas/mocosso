@@ -1,0 +1,18 @@
+[Unit]
+Description=HTTP/gRPC Single sing-on
+After=syslog.target
+After=network.target
+
+[Service]
+Type=forking
+WorkingDirectory=
+
+User=root
+Group=root
+
+ExecStart=
+TimeoutSec=300
+StandartOutput=inherit
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,32 @@
+core: 
+  mode: "release" # default is "release", "local", "development"
+  address: # ip address to bind, default is "any"
+
+  ssl: false # default is false (disabled)
+  cert_path: "cert.pem"
+  key_path: "key.pem"
+
+  shutdown_timeout: 30s # default is 30s
+
+log:
+  format: "json" # console or json
+  level: "debug"  # default is debug
+  path: "stdout" # log path default is stdout console, but could file
+
+storage:
+  database_uri: "postgres://user:password@localhost:5432/mixert?sslmode=disable"
+
+cache:
+  enabled: false
+
+  redis:
+    
+  memory:
+
+http:
+  enabled: true
+  port: "8080"
+
+grpc:
+  enabled: false
+  port: "9090"

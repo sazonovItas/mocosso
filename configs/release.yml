@@ -1,0 +1,32 @@
+core: 
+  mode: "release"
+  address:
+
+  ssl: true
+  cert_path: "cert.pem"
+  key_path: "key.pem"
+
+  shutdown_timeout: 30s
+
+log:
+  format: "json"
+  level: "error" 
+  log_path: "stdout" 
+
+storage:
+  database_uri: "postgres://user:password@localhost:5432/mixert?sslmode=disable"
+
+cache:
+  enabled: true
+
+  redis:
+    
+  memory:
+
+http:
+  enabled: true
+  port: "8080"
+
+grpc:
+  enabled: true
+  port: "9090"
