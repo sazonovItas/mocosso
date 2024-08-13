@@ -47,6 +47,7 @@ storage:
 
 cache:
   enabled: false
+	type: "memory"
 
   redis:
     
@@ -161,14 +162,29 @@ func (sc *SectionGRPC) Load() {
 
 // LoadConfig function load config from viper.
 func LoadConfig(confPath ...string) (conf *ConfigYaml, err error) {
-	conf = &ConfigYaml{}
+	const op = "config.LoadConfig"
 
+	conf = &ConfigYaml{}
 	if err := LoadViper(confPath...); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
 	conf.Load()
 	return conf, nil
+}
+
+// MustLoadConfig function load config from viper.
+// If any of errors occurred It panics.
+func MustLoadConfig(confPath ...string) (conf *ConfigYaml) {
+	const op = "config.MustLoadConfig"
+
+	conf = &ConfigYaml{}
+	if err := LoadViper(confPath...); err != nil {
+		panic(fmt.Errorf("%s: %w", op, err))
+	}
+
+	conf.Load()
+	return conf
 }
 
 // LoadViper function load config in viper from file and read env vars that match.
@@ -192,12 +208,12 @@ func LoadViper(confPath ...string) (err error) {
 	} else {
 		viper.AddConfigPath(ConfigEtcDir)
 		viper.AddConfigPath(ConfigHomeDir)
-		viper.AddConfigPath(".")
+		viper.AddConfigPath("./configs")
 
 		viper.SetConfigName(ConfigFileName)
 
 		if err := viper.ReadInConfig(); err == nil {
-			fmt.Printf("[using %s config file used]\n", viper.ConfigFileUsed())
+			fmt.Printf("[%s - config file used]\n", viper.ConfigFileUsed())
 		} else if err := viper.ReadConfig(bytes.NewBuffer(defaultConfig)); err != nil {
 			return fmt.Errorf("failed to load default config in viper: %w", err)
 		}

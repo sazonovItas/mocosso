@@ -61,7 +61,7 @@ func MustConnect(
 	}
 
 	if err := conn.Ping(ctx); err != nil {
-		panic(fmt.Errorf("failed to pint database: %w", err))
+		panic(fmt.Errorf("failed to ping database: %w", err))
 	}
 
 	return conn

@@ -9,6 +9,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const configDir = "./configs"
+
 func TestMissingFile(t *testing.T) {
 	_, err := LoadConfig("test")
 	assert.NotNil(t, err, "should be error file missing: %v", err)
