@@ -10,13 +10,13 @@ CONTAINER_NAME = sso-service
 
 .PHONY: build run run-race
 build:
-	@CGO_ENABLED=0 GOARCH=${ARCH} GOOS=${OS} go build -o ./bin/sso ./cmd/sso
+	@CGO_ENABLED=0 GOARCH=${ARCH} GOOS=${OS} go build -o ./bin/mocosso .
 
 run:
-	@CGO_ENABLED=0 GOARCH=${ARCH} GOOS=${OS} go run ./cmd/sso
+	@CGO_ENABLED=0 GOARCH=${ARCH} GOOS=${OS} go run .
 
 run-race:
-	@CGO_ENABLED=1 GOARCH=${ARCH} GOOS=${OS} go run -race ./cmd/sso
+	@CGO_ENABLED=1 GOARCH=${ARCH} GOOS=${OS} go run -race .
 
 .PHONY: gen-proto gen-sqlc gen-all
 gen-proto:
@@ -46,9 +46,15 @@ run-test-db:
 stop-test-db:
 	docker compose down test_db migrator
 
+run-sso-dev-up:
+	docker compose --env-file=./deploy/docker/env/dev.env -f ./deploy/docker/compose.dev.yml --project-directory . up -d
+
+run-sso-dev-down:
+	docker compose --env-file=./deploy/docker/env/dev.env -f ./deploy/docker/compose.dev.yml --project-directory . down
+
 .PHONY: lint test 
 lint:
-	golangci-lint run --config .golangci.yaml ./...
+	golangci-lint run --config .golangci.yml ./...
 
 test:
 	@if [ -f coverage.txt ]; then rm coverage.txt; fi;
@@ -58,4 +64,4 @@ test:
 
 .PHONY: clean
 clean:
-	rm ./bin/*
+	rm -rf ./bin/*

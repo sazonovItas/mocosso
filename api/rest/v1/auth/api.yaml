@@ -1,0 +1,352 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Single sign on rest api
+  description: Documentation for single sign on rest api
+servers:  
+  - url: /api/v1/au
+paths:
+  /register:
+    post:
+      operationId: Register
+      parameters:
+        - name: redirect_uri
+          in: query 
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserRegisterRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/UserRegisterRequest"
+        required: true
+      responses:
+        201: { }
+        5XX: 
+          content:
+            application/json:
+              schema:
+                $ref: "../common/api.yaml#/components/schemas/Error"
+  /login:
+    post:
+      operationId: Login
+      parameters:
+        - name: remember
+          in: query
+          schema:
+            type: string
+        - name: User-Agent
+          in: header
+          schema:
+            type: string
+          required: true
+      requestBody:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserLoginRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/UserLoginRequest"
+      responses:
+        200:
+          headers:
+            Set-Cookie:
+              schema:
+                type: object
+                properties:
+                  refresh_token:
+                    type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccessTokenResponse"
+        400:
+          content:
+            application/json:
+              schema:
+                $ref: "../common/api.yaml#/components/schemas/Error"
+        404:
+          content:
+            application/json:
+              schema:
+                $ref: "../common/api.yaml#/components/schemas/Error"
+        5XX: 
+          content:
+            application/json:
+              schema:
+                $ref: "../common/api.yaml#/components/schemas/Error"
+  /refresh:
+    get:
+      operationId: Refresh
+      parameters:
+        - name: refresh_token
+          in: cookie
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccessTokenResponse"
+        400:
+          content:
+            application/json:
+              schema:
+                $ref: "../common/api.yaml#/components/schemas/Error"
+        401:
+          content:
+            application/json:
+              schema:
+                $ref: "../common/api.yaml#/components/schemas/Error"
+        5XX: 
+          content:
+            application/json:
+              schema:
+                $ref: "../common/api.yaml#/components/schemas/Error"
+  /logout:
+    post:
+      operationId: Logout
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: from_all
+          in: query
+          schema:
+            type: boolean
+      responses:
+        200: { }
+        400:
+          content:
+            application/json:
+              schema:
+                $ref: "../common/api.yaml#/components/schemas/Error"
+        401:
+          content:
+            application/json:
+              schema:
+                $ref: "../common/api.yaml#/components/schemas/Error"
+        5XX: 
+          content:
+            application/json:
+              schema:
+                $ref: "../common/api.yaml#/components/schemas/Error"
+  /introspect-token:
+    get:
+      operationId: IntrospectToken
+      security:
+        - BearerAuth: [ ]
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:  
+                    type: boolean
+        400:
+          content:
+            application/json:
+              schema:
+                $ref: "../common/api.yaml#/components/schemas/Error"
+        401:
+          content:
+            application/json:
+              schema:
+                $ref: "../common/api.yaml#/components/schemas/Error"
+        5XX: 
+          content:
+            application/json:
+              schema:
+                $ref: "../common/api.yaml#/components/schemas/Error"
+  /verify/email:
+    get:
+      operationId: VerifyEmailToken
+      parameters:
+        - name: token
+          in: query
+          schema:
+            type: string
+          required: true
+      responses:
+        200: { }
+        400:
+          content:
+            application/json:
+              schema:
+                $ref: "../common/api.yaml#/components/schemas/Error"
+        404: 
+          content:
+            application/json:
+              schema:
+                $ref: "../common/api.yaml#/components/schemas/Error"
+        5XX: 
+          content:
+            application/json:
+              schema:
+                $ref: "../common/api.yaml#/components/schemas/Error"
+    post:
+      operationId: VerifyEmail
+      parameters:
+        - name: token
+          in: query
+          schema:
+            type: string
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerificationCodeRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/VerificationCodeRequest"
+      responses:
+        200: { }
+        400:
+          content:
+            application/json:
+              schema:
+                $ref: "../common/api.yaml#/components/schemas/Error"
+        404: 
+          content:
+            application/json:
+              schema:
+                $ref: "../common/api.yaml#/components/schemas/Error"
+        5XX: 
+          content:
+            application/json:
+              schema:
+                $ref: "../common/api.yaml#/components/schemas/Error"
+  /verify/password-reset:
+    get:
+      operationId: VerifyPasswordReset
+      parameters:
+        - name: token
+          in: query
+          schema:
+            type: string
+          required: true
+      responses:
+        200: { }
+        400:
+          content:
+            application/json:
+              schema:
+                $ref: "../common/api.yaml#/components/schemas/Error"
+        404: 
+          content:
+            application/json:
+              schema:
+                $ref: "../common/api.yaml#/components/schemas/Error"
+        5XX: 
+          content:
+            application/json:
+              schema:
+                $ref: "../common/api.yaml#/components/schemas/Error"
+  /pass-reset-code:
+    put:
+      operationId: GeneratePasswordResetCode 
+      requestBody: 
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmailRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/EmailRequest"
+  /reset-password:
+    post:
+      operationId: ResetPassword
+      parameters:
+        - name: token
+          in: query
+          schema:
+            type: string
+          required: true
+      requestBody:
+        content:
+          schema:
+            $ref: ResetPasswordRequest
+      responses:
+        201: { }
+        5XX: 
+          content:
+            application/json:
+              schema:
+                $ref: "../common/api.yaml#/components/schemas/Error"
+components:
+  schemas:
+    UserRegisterRequest:
+      required:
+        - email
+        - username 
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: User email
+        username:
+          type: string
+          description: User's name
+        password:
+          type: string
+          description: User password
+    UserLoginRequest:
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: User email
+        password:
+          type: string
+          description: User password
+    AccessTokenResponse:
+      required:
+        - access_token
+      properties:
+        access_token:
+          type: string
+          description: Access token
+    EmailRequest:
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          description: User email
+    VerificationCodeRequest:
+      required:
+        - code
+      properties:
+        code:
+          type: string
+          description: Code for the verification 
+        redirect_uri:
+          type: string
+          description: URI for redirection
+    ResetPasswordRequest:
+      required:
+        - code
+        - new_password
+      properties:
+        code:
+          type: string
+          description: Code for the verification 
+        new_password:
+          type: string
+          description: New user password
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

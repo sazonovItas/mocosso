@@ -1,0 +1,22 @@
+components: 
+  schemas:
+    Error:
+      type: object
+      x-go-type: httputils.Error
+      x-go-type-import:
+        path: github.com/sazonovItas/mocosso/internal/handler/http/utils
+        name: httputils
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+          description: Error code
+        message:
+          type: string
+          description: Error message
+        description:
+          type: string
+          description: Error description

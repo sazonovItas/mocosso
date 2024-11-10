@@ -1,53 +1,21 @@
 package logger
 
 import (
-	"io"
-	"log/slog"
-	"os"
-	"sync"
+	"context"
+
+	"go.uber.org/zap"
 )
 
-var (
-	logger     Logger
-	loggerOnce sync.Once
+type loggerCtxKey struct{}
 
-	logWriter io.Writer
-)
-
-func SetLogWriter(out io.Writer) {
-	logWriter = out
+func ToContext(ctx context.Context, logger *zap.Logger) context.Context {
+	return context.WithValue(ctx, loggerCtxKey{}, logger)
 }
 
-// getLogger returns a logger singleton configured to log in json format
-func getLogger() Logger {
-	loggerOnce.Do(func() {
-		logger = NewSlogInterceptor(slog.New(slog.NewJSONHandler(logWriter, nil)))
-	})
-
-	return logger
-}
-
-// getLogWriter returns a writer for a logger or os.Stdout
-func getLogWriter() io.Writer {
-	if logWriter == nil {
-		return os.Stdout
+func FromContext(ctx context.Context) *zap.Logger {
+	if logger, ok := ctx.Value(loggerCtxKey{}).(*zap.Logger); ok {
+		return logger
 	}
 
-	return logWriter
-}
-
-func Debug(msg string, args ...any) {
-	getLogger().Debug(msg, args...)
-}
-
-func Info(msg string, args ...any) {
-	getLogger().Info(msg, args...)
-}
-
-func Warn(msg string, args ...any) {
-	getLogger().Warn(msg, args...)
-}
-
-func Error(msg string, args ...any) {
-	getLogger().Error(msg, args...)
+	return getLogger()
 }

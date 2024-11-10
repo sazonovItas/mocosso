@@ -1,0 +1,9 @@
+apiVersion: 1
+
+datasources:
+  - name: default
+    uid: sso-metrics
+    type: prometheus
+    url: ${GF_PROMETHEUS_URL}
+    editable: true
+    isDefault: true

@@ -1,89 +1,115 @@
 version: "3.8"
 
+volumes:
+  pg-data: {}
+  prometheus-data: {}
+
+networks:
+  dev-net: {}
+  pg-net: {}
+  metric-net: {}
+
 services:
-  sso:
-    container_name: sso-service
-    hostname: sso-service
-    build:
-      context: .
-      dockerfile: ./deploy/docker/sso.Dockerfile
-
-    restart: unless-stopped
-
-    networks:
-      sso-common-network:
-
-
-    logging:
-      options:
-        max-size: "100k"
-        max-file: "3"
-
-  migrator:
-    container_name: go-migrator
-    hostname: go-migrator
-    build:
-      context: .
-      dockerfile: ./deploy/docker/migrator.Dockerfile
-
+  postgres:
+    container_name: sso-postgres
+    image: postgres:15.8-alpine3.20
+    command:
+      - "postgres"
+      - "-c"
+      - "max_connections=50"
+      - "-c"
+      - "effective_cache_size=4GB"
+      - "-c"
+      - "work_mem=16MB"
+      - "-c"
+      - "temp_file_limit=10GB"
+      - "-c"
+      - "log_min_duration_statement=200ms"
+    environment:
+      POSTGRES_DB: ${PGDBNAME}
+      POSTGRES_USER: ${PGUSER}
+      POSTGRES_PASSWORD: ${PGPASS}
+      PGDATA: ${PGDATA}
     volumes:
-      - "./migrations:/migrations"
-
+      - "pg-data:${PGDATA}"
     networks:
-      sso-common-network:
+      - dev-net
+      - pg-net
+    ports:
+      - "${PGPORT}:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${PGUSER} -d ${PGDBNAME}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: "2G"
 
-
-    command: [ "-path", "/migrations", "-database", "postgres://itas:password@test_db:5432/mixery?sslmode=disable", "up" ]
-
+  postgres-exporter:
+    container_name: sso-pgexporter
+    image: prometheuscommunity/postgres-exporter:v0.15.0
+    environment:
+      DATA_SOURCE_URI: "postgres:${PGPORT}/${PGDBNAME}?sslmode=disable"
+      DATA_SOURCE_USER: ${PGUSER}
+      DATA_SOURCE_PASS: ${PGPASS}
+    networks:
+      pg-net:
+      metric-net:
+    ports:
+      - "${PGEXPORTER_PORT}:9187"
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.2"
+          memory: "500M"
     depends_on:
-      test_db:
+      postgres:
         condition: service_healthy
         restart: true
 
-  db:
-    image: postgres:alpine
-    container_name: sso-service-db
-    restart: unless-stopped
-
-    networks:
-      sso-common-network:
-
-
+  prometheus:
+    container_name: sso-prometheus
+    image: prom/prometheus
     volumes:
-      - "sso-data:/var/lib/postgresql/data"
-    # healthcheck:
-    #  test: [ "CMD-SHELL", "pg_isready", "-d", "${POSTGRES_URI}" ]
-    #  interval: 10s
-    #  timeout: 5s
-    #  retries: 3
-
-  test_db:
-    image: postgres:alpine
-    container_name: test-db
-    restart: unless-stopped
-
+      - "prometheus-data:/prometheus"
+      - "${PROMETHEUS_CONFIG}:/etc/prometheus/:ro"
     networks:
-      sso-common-network:
-
-
+      - metric-net
     ports:
-      - "5432:5432"
+      - "${PROMETHEUS_PORT}:9090"
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: "1G"
+    depends_on:
+      postgres-exporter:
+        condition: service_started
+        restart: true
 
-    environment:
-      POSTGRES_DB: "mixery"
-      POSTGRES_USER: "itas"
-      POSTGRES_PASSWORD: "password"
-
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready", "-d", "postgres://itas:password@localhost:5432/mixery?sslmode=disable" ]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-
-networks:
-  sso-common-network:
-    name: "sso-common-network"
-
-volumes:
-  sso-data:
-    name: "sso-data"
+  grafana:
+    container_name: sso-grafana
+    image: grafana/grafana
+    volumes:
+      - "${GRAFANA_PROVISIONING_CONFIG}:/etc/grafana/provisioning/"
+    networks:
+      - metric-net
+    ports:
+      - "${GRAFANA_PORT}:3000"
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: "1G"
+    depends_on:
+      prometheus:
+        condition: service_started
+        restart: true

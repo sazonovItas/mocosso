@@ -1,0 +1,23 @@
+version: "2"
+sql:
+  - engine: "postgresql"
+    queries: "postgres/queries"
+    schema: "../migrations"
+    gen:
+      go:
+        package: "postgresdb"
+        out: "../gen/go/db/postgres"
+        sql_package: "pgx/v5"
+        overrides:
+          - db_type: "boolean"
+            go_type:
+              import: ""
+              type: "bool"
+          - db_type: "text"
+            go_type:
+              import: ""
+              type: "string"
+          - db_type: "timestamptz"
+            go_type:
+              import: "time"
+              type: "Time"

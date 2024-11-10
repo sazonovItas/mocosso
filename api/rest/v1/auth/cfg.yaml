@@ -1,0 +1,11 @@
+package: authv1
+output: ../../../../gen/go/rest/v1/auth/auth.gen.go
+generate:
+  models: true
+  chi-server: true
+  client: true
+  embedded-spec: true
+output-options:
+  skip-prune: true
+import-mapping:
+  ../common/api.yaml: "github.com/sazonovItas/mocosso/gen/go/rest/v1/common"

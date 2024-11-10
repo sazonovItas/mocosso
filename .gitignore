@@ -1,2 +1,13 @@
-bin**
-.env**
+#########
+# Files #
+#########
+
+coverage.txt
+docs/*.yaml
+
+########
+# Dirs #
+########
+
+.git**
+bin

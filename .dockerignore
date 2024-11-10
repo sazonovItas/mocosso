@@ -1,7 +1,20 @@
+#########
+# Files #
+#########
+
 .git**
-workflows
+
+Makefile
+coverage.txt
+.golangci.yml
+*.md
+
+##########
+#  Dirs  #
+##########
 
 bin
-Makefile
-
-docker-compose.yaml
+deploy
+certs
+docs
+api

@@ -1,0 +1,10 @@
+name: "server"
+http:
+  port: "9090"
+  timeout: "5s"
+  idle_timeout: "60s"
+
+grpc:
+  port: "8080"
+  timeout: "5s"
+

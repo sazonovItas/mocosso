@@ -5,14 +5,12 @@ After=network.target
 
 [Service]
 Type=forking
-WorkingDirectory=
+WorkingDirectory=/var/run/mocosso
 
-User=root
-Group=root
+User=mocosso
+Group=mocosso
 
-ExecStart=
-TimeoutSec=300
-StandartOutput=inherit
+ExecStart=/usr/local/bin/mocosso
 
 [Install]
 WantedBy=multi-user.target

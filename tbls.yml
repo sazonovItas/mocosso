@@ -1,2 +1,0 @@
-dsn: "postgres://itas:password@localhost:5432/mixery?sslmode=disable"
-docPath: "doc/schema"

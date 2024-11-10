@@ -7,62 +7,46 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-// Option interface applies options for pgx pool config.
-type Option interface {
-	Apply(cfg *pgxpool.Config)
-}
-
-// Connect function creates pgx connetions pool with given options and ping db.
-func Connect(
+// ConnectPool function creates pgx connetions pool with given options and ping db.
+func ConnectPool(
 	ctx context.Context,
 	connString string,
-	options ...Option,
-) (conn *pgxpool.Pool, err error) {
+	options ...PoolOption,
+) (pool *pgxpool.Pool, err error) {
+	const op = "pkg.postgres.ConnectPool"
+
 	cfg, err := pgxpool.ParseConfig(connString)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse config from connection string: %w", err)
+		return nil, fmt.Errorf("%s: failed to parse config from connection string: %w", op, err)
 	}
 
 	for _, option := range options {
 		option.Apply(cfg)
 	}
 
-	conn, err = pgxpool.NewWithConfig(ctx, cfg)
+	pool, err = pgxpool.NewWithConfig(ctx, cfg)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create pgx pool with config: %w", err)
+		return nil, fmt.Errorf("%s: failed to create pgx pool with config: %w", op, err)
 	}
 
-	if err := conn.Ping(ctx); err != nil {
-		return nil, fmt.Errorf("failed to pint database: %w", err)
+	if err := pool.Ping(ctx); err != nil {
+		return nil, fmt.Errorf("%s: failed to ping database: %w", op, err)
 	}
 
-	return conn, nil
+	return pool, nil
 }
 
-// Connect function creates pgx connetions pool with
+// MustConnectPool function creates pgx connetions pool with
 // given options and ping db. It panics if any of errors occurred.
-func MustConnect(
+func MustConnectPool(
 	ctx context.Context,
 	connString string,
-	options ...Option,
-) (conn *pgxpool.Pool) {
-	cfg, err := pgxpool.ParseConfig(connString)
+	options ...PoolOption,
+) (pool *pgxpool.Pool) {
+	pool, err := ConnectPool(ctx, connString, options...)
 	if err != nil {
-		panic(fmt.Errorf("failed to parse config from connection string: %w", err))
+		panic(err)
 	}
 
-	for _, option := range options {
-		option.Apply(cfg)
-	}
-
-	conn, err = pgxpool.NewWithConfig(ctx, cfg)
-	if err != nil {
-		panic(fmt.Errorf("failed to create pgx pool with config: %w", err))
-	}
-
-	if err := conn.Ping(ctx); err != nil {
-		panic(fmt.Errorf("failed to ping database: %w", err))
-	}
-
-	return conn
+	return pool
 }
