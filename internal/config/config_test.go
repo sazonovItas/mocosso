@@ -1,21 +1,18 @@
-//go:build unit
-// +build unit
-
-package app
+package config
 
 import (
 	"reflect"
 	"testing"
 	"time"
 
-	"github.com/sazonovItas/mocosso/pkg/config"
+	configloader "github.com/sazonovItas/mocosso/pkg/config"
 )
 
 func TestConfig(t *testing.T) {
 	type args struct {
 		configPath        string
 		ignoreMissingFile bool
-		options           []config.Option
+		options           []configloader.Option
 	}
 
 	tests := []struct {
@@ -29,8 +26,8 @@ func TestConfig(t *testing.T) {
 			name: "Test setup default values",
 			args: args{
 				ignoreMissingFile: true,
-				options: []config.Option{
-					config.WithDefaults(map[string]any{
+				options: []configloader.Option{
+					configloader.WithDefaults(map[string]any{
 						"core.env":              "local",
 						"core.host":             "localhost",
 						"core.service_name":     "mocosso",
@@ -57,8 +54,8 @@ func TestConfig(t *testing.T) {
 			},
 			args: args{
 				ignoreMissingFile: true,
-				options: []config.Option{
-					config.WithEnvs(ConfigEnvPrefix),
+				options: []configloader.Option{
+					configloader.WithEnvs(ConfigEnvPrefix),
 				},
 			},
 			want: Config{
@@ -81,14 +78,14 @@ func TestConfig(t *testing.T) {
 			},
 			args: args{
 				ignoreMissingFile: true,
-				options: []config.Option{
-					config.WithDefaults(map[string]any{
+				options: []configloader.Option{
+					configloader.WithDefaults(map[string]any{
 						"core.env":                    "local",
 						"core.host":                   "localhost",
 						"auth.token.access_liveness":  30 * time.Minute,
 						"auth.token.refresh_liveness": 720 * time.Hour,
 					}),
-					config.WithEnvs(ConfigEnvPrefix),
+					configloader.WithEnvs(ConfigEnvPrefix),
 				},
 			},
 			want: Config{
@@ -115,7 +112,7 @@ func TestConfig(t *testing.T) {
 			}
 
 			var cfg Config
-			if err := config.Load(&cfg, tt.args.configPath, tt.args.ignoreMissingFile, tt.args.options...); (err != nil) != tt.wantErr {
+			if err := configloader.Load(&cfg, tt.args.configPath, tt.args.ignoreMissingFile, tt.args.options...); (err != nil) != tt.wantErr {
 				t.Errorf("Load() error = %v, wantErr %v", err, tt.wantErr)
 			}
 

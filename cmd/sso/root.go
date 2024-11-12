@@ -9,7 +9,8 @@ import (
 
 	goversion "github.com/caarlos0/go-version"
 	"github.com/sazonovItas/mocosso/internal/app"
-	"github.com/sazonovItas/mocosso/pkg/config"
+	"github.com/sazonovItas/mocosso/internal/config"
+	configloader "github.com/sazonovItas/mocosso/pkg/config"
 	"github.com/sazonovItas/mocosso/pkg/logger"
 	"github.com/spf13/cobra"
 )
@@ -53,16 +54,16 @@ func newRootCmd(version goversion.Info, exit func(int)) *rootCmd {
 		Args:              cobra.NoArgs,
 		ValidArgsFunction: cobra.NoFileCompletions,
 		RunE: func(cmd *cobra.Command, _ []string) (err error) {
-			var cfg app.Config
-			if err = config.Load(
+			var cfg config.Config
+			if err = configloader.Load(
 				&cfg,
 				root.opts.configPath,
 				true,
-				config.WithEnvs(app.ConfigEnvPrefix),
-				config.WithConfigName(app.ConfigFileName),
-				config.WithConfigType("yaml"),
-				config.WithConfigPaths(app.ConfigHomeDir, app.ConfigEtcDir, "."),
-				config.WithDefaults(map[string]any{
+				configloader.WithEnvs(config.ConfigEnvPrefix),
+				configloader.WithConfigName(config.ConfigFileName),
+				configloader.WithConfigType("yaml"),
+				configloader.WithConfigPaths(config.ConfigHomeDir, config.ConfigEtcDir, "."),
+				configloader.WithDefaults(map[string]any{
 					// core section defaults
 					"core.env":              "development",
 					"core.service_name":     "mocosso",

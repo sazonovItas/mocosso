@@ -7,9 +7,26 @@ package postgresdb
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
+	"time"
 )
+
+const addRoleToUserAccount = `-- name: AddRoleToUserAccount :exec
+insert into user_role (
+  user_id, role_id
+) values (
+  $1, $2
+)
+`
+
+type AddRoleToUserAccountParams struct {
+	UserID int64
+	RoleID int32
+}
+
+func (q *Queries) AddRoleToUserAccount(ctx context.Context, arg AddRoleToUserAccountParams) error {
+	_, err := q.db.Exec(ctx, addRoleToUserAccount, arg.UserID, arg.RoleID)
+	return err
+}
 
 const createUserAccount = `-- name: CreateUserAccount :one
 insert into user_account (
@@ -49,7 +66,7 @@ where id = $2
 `
 
 type DeleteUserAccountParams struct {
-	DeletedAt pgtype.Timestamptz
+	DeletedAt *time.Time
 	ID        int64
 }
 
@@ -136,16 +153,16 @@ func (q *Queries) ListUserAccount(ctx context.Context) ([]UserAccount, error) {
 	return items, nil
 }
 
-const listUserRoles = `-- name: ListUserRoles :many
+const listUserAccountRoles = `-- name: ListUserAccountRoles :many
 select r.id, r.name, r.description from role as r
 join (
   select role_id from user_role
   where user_id = $1
-) as ur on r.id = ur.id
+) as ur on r.id = ur.role_id
 `
 
-func (q *Queries) ListUserRoles(ctx context.Context, userID int64) ([]Role, error) {
-	rows, err := q.db.Query(ctx, listUserRoles, userID)
+func (q *Queries) ListUserAccountRoles(ctx context.Context, userID int64) ([]Role, error) {
+	rows, err := q.db.Query(ctx, listUserAccountRoles, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -164,20 +181,57 @@ func (q *Queries) ListUserRoles(ctx context.Context, userID int64) ([]Role, erro
 	return items, nil
 }
 
+const listUserAccountScopes = `-- name: ListUserAccountScopes :many
+select distinct sc.id, sc.name, sc.description 
+from scope as sc
+join (
+  select distinct rsc.scope_id 
+  from role_scope as rsc
+  join (
+    select id as role_id from role as r
+    join (
+      select role_id from user_role
+      where user_id = $1
+    ) as ur on r.id = ur.role_id
+  ) as r on rsc.role_id = r.role_id
+) as usc on sc.id = rsc.scope_id
+`
+
+func (q *Queries) ListUserAccountScopes(ctx context.Context, userID int64) ([]Scope, error) {
+	rows, err := q.db.Query(ctx, listUserAccountScopes, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Scope
+	for rows.Next() {
+		var i Scope
+		if err := rows.Scan(&i.ID, &i.Name, &i.Description); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateUserAccount = `-- name: UpdateUserAccount :exec
 update user_account
   set email = $1,
   username = $2
-where id = $1
+where id = $3
 `
 
 type UpdateUserAccountParams struct {
 	Email    string
 	Username string
+	ID       int64
 }
 
 func (q *Queries) UpdateUserAccount(ctx context.Context, arg UpdateUserAccountParams) error {
-	_, err := q.db.Exec(ctx, updateUserAccount, arg.Email, arg.Username)
+	_, err := q.db.Exec(ctx, updateUserAccount, arg.Email, arg.Username, arg.ID)
 	return err
 }
 
@@ -188,12 +242,28 @@ where id = $2
 `
 
 type UpdateUserAccountAvatarParams struct {
-	Avatar pgtype.Text
+	Avatar string
 	ID     int64
 }
 
 func (q *Queries) UpdateUserAccountAvatar(ctx context.Context, arg UpdateUserAccountAvatarParams) error {
 	_, err := q.db.Exec(ctx, updateUserAccountAvatar, arg.Avatar, arg.ID)
+	return err
+}
+
+const updateUserAccountPassword = `-- name: UpdateUserAccountPassword :exec
+update user_account
+  set password_hash = $1
+where id = $2
+`
+
+type UpdateUserAccountPasswordParams struct {
+	PasswordHash string
+	ID           int64
+}
+
+func (q *Queries) UpdateUserAccountPassword(ctx context.Context, arg UpdateUserAccountPasswordParams) error {
+	_, err := q.db.Exec(ctx, updateUserAccountPassword, arg.PasswordHash, arg.ID)
 	return err
 }
 
@@ -204,7 +274,7 @@ where email = $2
 `
 
 type UpdateUserAccountVerifiedStatusParams struct {
-	IsVerified pgtype.Bool
+	IsVerified bool
 	Email      string
 }
 

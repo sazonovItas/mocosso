@@ -19,6 +19,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/go-chi/chi/v5"
 	"github.com/oapi-codegen/runtime"
+	strictnethttp "github.com/oapi-codegen/runtime/strictmiddleware/nethttp"
 	openapi_types "github.com/oapi-codegen/runtime/types"
 	externalRef0 "github.com/sazonovItas/mocosso/gen/go/rest/v1/common"
 )
@@ -36,7 +37,7 @@ type AccessTokenResponse struct {
 // EmailRequest defines model for EmailRequest.
 type EmailRequest struct {
 	// Email User email
-	Email string `json:"email"`
+	Email openapi_types.Email `json:"email"`
 }
 
 // ResetPasswordRequest defines model for ResetPasswordRequest.
@@ -495,7 +496,6 @@ func NewLoginRequestWithBody(server string, params *LoginParams, contentType str
 		queryValues := queryURL.Query()
 
 		if params.Remember != nil {
-
 			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "remember", runtime.ParamLocationQuery, *params.Remember); err != nil {
 				return nil, err
 			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
@@ -507,7 +507,6 @@ func NewLoginRequestWithBody(server string, params *LoginParams, contentType str
 					}
 				}
 			}
-
 		}
 
 		queryURL.RawQuery = queryValues.Encode()
@@ -559,7 +558,6 @@ func NewLogoutRequest(server string, params *LogoutParams) (*http.Request, error
 		queryValues := queryURL.Query()
 
 		if params.FromAll != nil {
-
 			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "from_all", runtime.ParamLocationQuery, *params.FromAll); err != nil {
 				return nil, err
 			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
@@ -571,7 +569,6 @@ func NewLogoutRequest(server string, params *LogoutParams) (*http.Request, error
 					}
 				}
 			}
-
 		}
 
 		queryURL.RawQuery = queryValues.Encode()
@@ -724,7 +721,6 @@ func NewRegisterRequestWithBody(server string, params *RegisterParams, contentTy
 		queryValues := queryURL.Query()
 
 		if params.RedirectUri != nil {
-
 			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "redirect_uri", runtime.ParamLocationQuery, *params.RedirectUri); err != nil {
 				return nil, err
 			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
@@ -736,7 +732,6 @@ func NewRegisterRequestWithBody(server string, params *RegisterParams, contentTy
 					}
 				}
 			}
-
 		}
 
 		queryURL.RawQuery = queryValues.Encode()
@@ -1639,7 +1634,6 @@ func ParseRegisterResponse(rsp *http.Response) (*RegisterResponse, error) {
 			return nil, err
 		}
 		response.JSON5XX = &dest
-
 	}
 
 	return response, nil
@@ -1665,7 +1659,6 @@ func ParseResetPasswordResponse(rsp *http.Response) (*ResetPasswordResponse, err
 			return nil, err
 		}
 		response.JSON5XX = &dest
-
 	}
 
 	return response, nil
@@ -1793,7 +1786,6 @@ func ParseVerifyPasswordResetResponse(rsp *http.Response) (*VerifyPasswordResetR
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
-
 	// (GET /introspect-token)
 	IntrospectToken(w http.ResponseWriter, r *http.Request)
 
@@ -1890,7 +1882,6 @@ type MiddlewareFunc func(http.Handler) http.Handler
 
 // IntrospectToken operation middleware
 func (siw *ServerInterfaceWrapper) IntrospectToken(w http.ResponseWriter, r *http.Request) {
-
 	ctx := r.Context()
 
 	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
@@ -1910,7 +1901,6 @@ func (siw *ServerInterfaceWrapper) IntrospectToken(w http.ResponseWriter, r *htt
 
 // Login operation middleware
 func (siw *ServerInterfaceWrapper) Login(w http.ResponseWriter, r *http.Request) {
-
 	var err error
 
 	// Parameter object where we will unmarshal all parameters from the context
@@ -1962,7 +1952,6 @@ func (siw *ServerInterfaceWrapper) Login(w http.ResponseWriter, r *http.Request)
 
 // Logout operation middleware
 func (siw *ServerInterfaceWrapper) Logout(w http.ResponseWriter, r *http.Request) {
-
 	var err error
 
 	ctx := r.Context()
@@ -1995,7 +1984,6 @@ func (siw *ServerInterfaceWrapper) Logout(w http.ResponseWriter, r *http.Request
 
 // GeneratePasswordResetCode operation middleware
 func (siw *ServerInterfaceWrapper) GeneratePasswordResetCode(w http.ResponseWriter, r *http.Request) {
-
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GeneratePasswordResetCode(w, r)
 	}))
@@ -2009,7 +1997,6 @@ func (siw *ServerInterfaceWrapper) GeneratePasswordResetCode(w http.ResponseWrit
 
 // Refresh operation middleware
 func (siw *ServerInterfaceWrapper) Refresh(w http.ResponseWriter, r *http.Request) {
-
 	var err error
 
 	// Parameter object where we will unmarshal all parameters from the context
@@ -2046,7 +2033,6 @@ func (siw *ServerInterfaceWrapper) Refresh(w http.ResponseWriter, r *http.Reques
 
 // Register operation middleware
 func (siw *ServerInterfaceWrapper) Register(w http.ResponseWriter, r *http.Request) {
-
 	var err error
 
 	// Parameter object where we will unmarshal all parameters from the context
@@ -2073,7 +2059,6 @@ func (siw *ServerInterfaceWrapper) Register(w http.ResponseWriter, r *http.Reque
 
 // ResetPassword operation middleware
 func (siw *ServerInterfaceWrapper) ResetPassword(w http.ResponseWriter, r *http.Request) {
-
 	var err error
 
 	// Parameter object where we will unmarshal all parameters from the context
@@ -2082,7 +2067,6 @@ func (siw *ServerInterfaceWrapper) ResetPassword(w http.ResponseWriter, r *http.
 	// ------------- Required query parameter "token" -------------
 
 	if paramValue := r.URL.Query().Get("token"); paramValue != "" {
-
 	} else {
 		siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "token"})
 		return
@@ -2107,7 +2091,6 @@ func (siw *ServerInterfaceWrapper) ResetPassword(w http.ResponseWriter, r *http.
 
 // VerifyEmailToken operation middleware
 func (siw *ServerInterfaceWrapper) VerifyEmailToken(w http.ResponseWriter, r *http.Request) {
-
 	var err error
 
 	// Parameter object where we will unmarshal all parameters from the context
@@ -2116,7 +2099,6 @@ func (siw *ServerInterfaceWrapper) VerifyEmailToken(w http.ResponseWriter, r *ht
 	// ------------- Required query parameter "token" -------------
 
 	if paramValue := r.URL.Query().Get("token"); paramValue != "" {
-
 	} else {
 		siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "token"})
 		return
@@ -2141,7 +2123,6 @@ func (siw *ServerInterfaceWrapper) VerifyEmailToken(w http.ResponseWriter, r *ht
 
 // VerifyEmail operation middleware
 func (siw *ServerInterfaceWrapper) VerifyEmail(w http.ResponseWriter, r *http.Request) {
-
 	var err error
 
 	// Parameter object where we will unmarshal all parameters from the context
@@ -2150,7 +2131,6 @@ func (siw *ServerInterfaceWrapper) VerifyEmail(w http.ResponseWriter, r *http.Re
 	// ------------- Required query parameter "token" -------------
 
 	if paramValue := r.URL.Query().Get("token"); paramValue != "" {
-
 	} else {
 		siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "token"})
 		return
@@ -2175,7 +2155,6 @@ func (siw *ServerInterfaceWrapper) VerifyEmail(w http.ResponseWriter, r *http.Re
 
 // VerifyPasswordReset operation middleware
 func (siw *ServerInterfaceWrapper) VerifyPasswordReset(w http.ResponseWriter, r *http.Request) {
-
 	var err error
 
 	// Parameter object where we will unmarshal all parameters from the context
@@ -2184,7 +2163,6 @@ func (siw *ServerInterfaceWrapper) VerifyPasswordReset(w http.ResponseWriter, r 
 	// ------------- Required query parameter "token" -------------
 
 	if paramValue := r.URL.Query().Get("token"); paramValue != "" {
-
 	} else {
 		siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "token"})
 		return
@@ -2354,28 +2332,819 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	return r
 }
 
+type IntrospectTokenRequestObject struct{}
+
+type IntrospectTokenResponseObject interface {
+	VisitIntrospectTokenResponse(w http.ResponseWriter) error
+}
+
+type IntrospectToken200JSONResponse struct {
+	Success *bool `json:"success,omitempty"`
+}
+
+func (response IntrospectToken200JSONResponse) VisitIntrospectTokenResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type IntrospectToken400JSONResponse externalRef0.Error
+
+func (response IntrospectToken400JSONResponse) VisitIntrospectTokenResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type IntrospectToken401JSONResponse externalRef0.Error
+
+func (response IntrospectToken401JSONResponse) VisitIntrospectTokenResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type IntrospectToken5XXJSONResponse struct {
+	Body       externalRef0.Error
+	StatusCode int
+}
+
+func (response IntrospectToken5XXJSONResponse) VisitIntrospectTokenResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(response.StatusCode)
+
+	return json.NewEncoder(w).Encode(response.Body)
+}
+
+type LoginRequestObject struct {
+	Params LoginParams
+}
+
+type LoginResponseObject interface {
+	VisitLoginResponse(w http.ResponseWriter) error
+}
+
+type Login200ResponseHeaders struct {
+	SetCookie struct {
+		RefreshToken *string `json:"refresh_token,omitempty"`
+	}
+}
+
+type Login200JSONResponse struct {
+	Body    AccessTokenResponse
+	Headers Login200ResponseHeaders
+}
+
+func (response Login200JSONResponse) VisitLoginResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Set-Cookie", fmt.Sprint(response.Headers.SetCookie))
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response.Body)
+}
+
+type Login400JSONResponse externalRef0.Error
+
+func (response Login400JSONResponse) VisitLoginResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type Login404JSONResponse externalRef0.Error
+
+func (response Login404JSONResponse) VisitLoginResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type Login5XXJSONResponse struct {
+	Body       externalRef0.Error
+	StatusCode int
+}
+
+func (response Login5XXJSONResponse) VisitLoginResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(response.StatusCode)
+
+	return json.NewEncoder(w).Encode(response.Body)
+}
+
+type LogoutRequestObject struct {
+	Params LogoutParams
+}
+
+type LogoutResponseObject interface {
+	VisitLogoutResponse(w http.ResponseWriter) error
+}
+
+type Logout200Response struct{}
+
+func (response Logout200Response) VisitLogoutResponse(w http.ResponseWriter) error {
+	w.WriteHeader(200)
+	return nil
+}
+
+type Logout400JSONResponse externalRef0.Error
+
+func (response Logout400JSONResponse) VisitLogoutResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type Logout401JSONResponse externalRef0.Error
+
+func (response Logout401JSONResponse) VisitLogoutResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type Logout5XXJSONResponse struct {
+	Body       externalRef0.Error
+	StatusCode int
+}
+
+func (response Logout5XXJSONResponse) VisitLogoutResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(response.StatusCode)
+
+	return json.NewEncoder(w).Encode(response.Body)
+}
+
+type GeneratePasswordResetCodeRequestObject struct {
+	JSONBody     *GeneratePasswordResetCodeJSONRequestBody
+	FormdataBody *GeneratePasswordResetCodeFormdataRequestBody
+}
+
+type GeneratePasswordResetCodeResponseObject interface {
+	VisitGeneratePasswordResetCodeResponse(w http.ResponseWriter) error
+}
+
+type RefreshRequestObject struct {
+	Params RefreshParams
+}
+
+type RefreshResponseObject interface {
+	VisitRefreshResponse(w http.ResponseWriter) error
+}
+
+type Refresh200JSONResponse AccessTokenResponse
+
+func (response Refresh200JSONResponse) VisitRefreshResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type Refresh400JSONResponse externalRef0.Error
+
+func (response Refresh400JSONResponse) VisitRefreshResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type Refresh401JSONResponse externalRef0.Error
+
+func (response Refresh401JSONResponse) VisitRefreshResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type Refresh5XXJSONResponse struct {
+	Body       externalRef0.Error
+	StatusCode int
+}
+
+func (response Refresh5XXJSONResponse) VisitRefreshResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(response.StatusCode)
+
+	return json.NewEncoder(w).Encode(response.Body)
+}
+
+type RegisterRequestObject struct {
+	Params       RegisterParams
+	JSONBody     *RegisterJSONRequestBody
+	FormdataBody *RegisterFormdataRequestBody
+}
+
+type RegisterResponseObject interface {
+	VisitRegisterResponse(w http.ResponseWriter) error
+}
+
+type Register201Response struct{}
+
+func (response Register201Response) VisitRegisterResponse(w http.ResponseWriter) error {
+	w.WriteHeader(201)
+	return nil
+}
+
+type Register308Response struct{}
+
+func (response Register308Response) VisitRegisterResponse(w http.ResponseWriter) error {
+	w.WriteHeader(308)
+	return nil
+}
+
+type Register5XXJSONResponse struct {
+	Body       externalRef0.Error
+	StatusCode int
+}
+
+func (response Register5XXJSONResponse) VisitRegisterResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(response.StatusCode)
+
+	return json.NewEncoder(w).Encode(response.Body)
+}
+
+type ResetPasswordRequestObject struct {
+	Params ResetPasswordParams
+	Body   io.Reader
+}
+
+type ResetPasswordResponseObject interface {
+	VisitResetPasswordResponse(w http.ResponseWriter) error
+}
+
+type ResetPassword201Response struct{}
+
+func (response ResetPassword201Response) VisitResetPasswordResponse(w http.ResponseWriter) error {
+	w.WriteHeader(201)
+	return nil
+}
+
+type ResetPassword5XXJSONResponse struct {
+	Body       externalRef0.Error
+	StatusCode int
+}
+
+func (response ResetPassword5XXJSONResponse) VisitResetPasswordResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(response.StatusCode)
+
+	return json.NewEncoder(w).Encode(response.Body)
+}
+
+type VerifyEmailTokenRequestObject struct {
+	Params VerifyEmailTokenParams
+}
+
+type VerifyEmailTokenResponseObject interface {
+	VisitVerifyEmailTokenResponse(w http.ResponseWriter) error
+}
+
+type VerifyEmailToken200Response struct{}
+
+func (response VerifyEmailToken200Response) VisitVerifyEmailTokenResponse(w http.ResponseWriter) error {
+	w.WriteHeader(200)
+	return nil
+}
+
+type VerifyEmailToken400JSONResponse externalRef0.Error
+
+func (response VerifyEmailToken400JSONResponse) VisitVerifyEmailTokenResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type VerifyEmailToken404JSONResponse externalRef0.Error
+
+func (response VerifyEmailToken404JSONResponse) VisitVerifyEmailTokenResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type VerifyEmailToken5XXJSONResponse struct {
+	Body       externalRef0.Error
+	StatusCode int
+}
+
+func (response VerifyEmailToken5XXJSONResponse) VisitVerifyEmailTokenResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(response.StatusCode)
+
+	return json.NewEncoder(w).Encode(response.Body)
+}
+
+type VerifyEmailRequestObject struct {
+	Params       VerifyEmailParams
+	JSONBody     *VerifyEmailJSONRequestBody
+	FormdataBody *VerifyEmailFormdataRequestBody
+}
+
+type VerifyEmailResponseObject interface {
+	VisitVerifyEmailResponse(w http.ResponseWriter) error
+}
+
+type VerifyEmail200Response struct{}
+
+func (response VerifyEmail200Response) VisitVerifyEmailResponse(w http.ResponseWriter) error {
+	w.WriteHeader(200)
+	return nil
+}
+
+type VerifyEmail400JSONResponse externalRef0.Error
+
+func (response VerifyEmail400JSONResponse) VisitVerifyEmailResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type VerifyEmail404JSONResponse externalRef0.Error
+
+func (response VerifyEmail404JSONResponse) VisitVerifyEmailResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type VerifyEmail5XXJSONResponse struct {
+	Body       externalRef0.Error
+	StatusCode int
+}
+
+func (response VerifyEmail5XXJSONResponse) VisitVerifyEmailResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(response.StatusCode)
+
+	return json.NewEncoder(w).Encode(response.Body)
+}
+
+type VerifyPasswordResetRequestObject struct {
+	Params VerifyPasswordResetParams
+}
+
+type VerifyPasswordResetResponseObject interface {
+	VisitVerifyPasswordResetResponse(w http.ResponseWriter) error
+}
+
+type VerifyPasswordReset200Response struct{}
+
+func (response VerifyPasswordReset200Response) VisitVerifyPasswordResetResponse(w http.ResponseWriter) error {
+	w.WriteHeader(200)
+	return nil
+}
+
+type VerifyPasswordReset400JSONResponse externalRef0.Error
+
+func (response VerifyPasswordReset400JSONResponse) VisitVerifyPasswordResetResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type VerifyPasswordReset404JSONResponse externalRef0.Error
+
+func (response VerifyPasswordReset404JSONResponse) VisitVerifyPasswordResetResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type VerifyPasswordReset5XXJSONResponse struct {
+	Body       externalRef0.Error
+	StatusCode int
+}
+
+func (response VerifyPasswordReset5XXJSONResponse) VisitVerifyPasswordResetResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(response.StatusCode)
+
+	return json.NewEncoder(w).Encode(response.Body)
+}
+
+// StrictServerInterface represents all server handlers.
+type StrictServerInterface interface {
+	// (GET /introspect-token)
+	IntrospectToken(ctx context.Context, request IntrospectTokenRequestObject) (IntrospectTokenResponseObject, error)
+
+	// (POST /login)
+	Login(ctx context.Context, request LoginRequestObject) (LoginResponseObject, error)
+
+	// (POST /logout)
+	Logout(ctx context.Context, request LogoutRequestObject) (LogoutResponseObject, error)
+
+	// (PUT /pass-reset-code)
+	GeneratePasswordResetCode(ctx context.Context, request GeneratePasswordResetCodeRequestObject) (GeneratePasswordResetCodeResponseObject, error)
+
+	// (GET /refresh)
+	Refresh(ctx context.Context, request RefreshRequestObject) (RefreshResponseObject, error)
+
+	// (POST /register)
+	Register(ctx context.Context, request RegisterRequestObject) (RegisterResponseObject, error)
+
+	// (POST /reset-password)
+	ResetPassword(ctx context.Context, request ResetPasswordRequestObject) (ResetPasswordResponseObject, error)
+
+	// (GET /verify/email)
+	VerifyEmailToken(ctx context.Context, request VerifyEmailTokenRequestObject) (VerifyEmailTokenResponseObject, error)
+
+	// (POST /verify/email)
+	VerifyEmail(ctx context.Context, request VerifyEmailRequestObject) (VerifyEmailResponseObject, error)
+
+	// (GET /verify/password-reset)
+	VerifyPasswordReset(ctx context.Context, request VerifyPasswordResetRequestObject) (VerifyPasswordResetResponseObject, error)
+}
+
+type (
+	StrictHandlerFunc    = strictnethttp.StrictHTTPHandlerFunc
+	StrictMiddlewareFunc = strictnethttp.StrictHTTPMiddlewareFunc
+)
+
+type StrictHTTPServerOptions struct {
+	RequestErrorHandlerFunc  func(w http.ResponseWriter, r *http.Request, err error)
+	ResponseErrorHandlerFunc func(w http.ResponseWriter, r *http.Request, err error)
+}
+
+func NewStrictHandler(ssi StrictServerInterface, middlewares []StrictMiddlewareFunc) ServerInterface {
+	return &strictHandler{ssi: ssi, middlewares: middlewares, options: StrictHTTPServerOptions{
+		RequestErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request, err error) {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		},
+		ResponseErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request, err error) {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		},
+	}}
+}
+
+func NewStrictHandlerWithOptions(ssi StrictServerInterface, middlewares []StrictMiddlewareFunc, options StrictHTTPServerOptions) ServerInterface {
+	return &strictHandler{ssi: ssi, middlewares: middlewares, options: options}
+}
+
+type strictHandler struct {
+	ssi         StrictServerInterface
+	middlewares []StrictMiddlewareFunc
+	options     StrictHTTPServerOptions
+}
+
+// IntrospectToken operation middleware
+func (sh *strictHandler) IntrospectToken(w http.ResponseWriter, r *http.Request) {
+	var request IntrospectTokenRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.IntrospectToken(ctx, request.(IntrospectTokenRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "IntrospectToken")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(IntrospectTokenResponseObject); ok {
+		if err := validResponse.VisitIntrospectTokenResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// Login operation middleware
+func (sh *strictHandler) Login(w http.ResponseWriter, r *http.Request, params LoginParams) {
+	var request LoginRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.Login(ctx, request.(LoginRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "Login")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(LoginResponseObject); ok {
+		if err := validResponse.VisitLoginResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// Logout operation middleware
+func (sh *strictHandler) Logout(w http.ResponseWriter, r *http.Request, params LogoutParams) {
+	var request LogoutRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.Logout(ctx, request.(LogoutRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "Logout")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(LogoutResponseObject); ok {
+		if err := validResponse.VisitLogoutResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GeneratePasswordResetCode operation middleware
+func (sh *strictHandler) GeneratePasswordResetCode(w http.ResponseWriter, r *http.Request) {
+	var request GeneratePasswordResetCodeRequestObject
+
+	if strings.HasPrefix(r.Header.Get("Content-Type"), "application/json") {
+
+		var body GeneratePasswordResetCodeJSONRequestBody
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+			return
+		}
+		request.JSONBody = &body
+	}
+	if strings.HasPrefix(r.Header.Get("Content-Type"), "application/x-www-form-urlencoded") {
+		if err := r.ParseForm(); err != nil {
+			sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode formdata: %w", err))
+			return
+		}
+		var body GeneratePasswordResetCodeFormdataRequestBody
+		if err := runtime.BindForm(&body, r.Form, nil, nil); err != nil {
+			sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't bind formdata: %w", err))
+			return
+		}
+		request.FormdataBody = &body
+	}
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GeneratePasswordResetCode(ctx, request.(GeneratePasswordResetCodeRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GeneratePasswordResetCode")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GeneratePasswordResetCodeResponseObject); ok {
+		if err := validResponse.VisitGeneratePasswordResetCodeResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// Refresh operation middleware
+func (sh *strictHandler) Refresh(w http.ResponseWriter, r *http.Request, params RefreshParams) {
+	var request RefreshRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.Refresh(ctx, request.(RefreshRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "Refresh")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(RefreshResponseObject); ok {
+		if err := validResponse.VisitRefreshResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// Register operation middleware
+func (sh *strictHandler) Register(w http.ResponseWriter, r *http.Request, params RegisterParams) {
+	var request RegisterRequestObject
+
+	request.Params = params
+	if strings.HasPrefix(r.Header.Get("Content-Type"), "application/json") {
+
+		var body RegisterJSONRequestBody
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+			return
+		}
+		request.JSONBody = &body
+	}
+	if strings.HasPrefix(r.Header.Get("Content-Type"), "application/x-www-form-urlencoded") {
+		if err := r.ParseForm(); err != nil {
+			sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode formdata: %w", err))
+			return
+		}
+		var body RegisterFormdataRequestBody
+		if err := runtime.BindForm(&body, r.Form, nil, nil); err != nil {
+			sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't bind formdata: %w", err))
+			return
+		}
+		request.FormdataBody = &body
+	}
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.Register(ctx, request.(RegisterRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "Register")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(RegisterResponseObject); ok {
+		if err := validResponse.VisitRegisterResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ResetPassword operation middleware
+func (sh *strictHandler) ResetPassword(w http.ResponseWriter, r *http.Request, params ResetPasswordParams) {
+	var request ResetPasswordRequestObject
+
+	request.Params = params
+
+	request.Body = r.Body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ResetPassword(ctx, request.(ResetPasswordRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ResetPassword")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ResetPasswordResponseObject); ok {
+		if err := validResponse.VisitResetPasswordResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// VerifyEmailToken operation middleware
+func (sh *strictHandler) VerifyEmailToken(w http.ResponseWriter, r *http.Request, params VerifyEmailTokenParams) {
+	var request VerifyEmailTokenRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.VerifyEmailToken(ctx, request.(VerifyEmailTokenRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "VerifyEmailToken")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(VerifyEmailTokenResponseObject); ok {
+		if err := validResponse.VisitVerifyEmailTokenResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// VerifyEmail operation middleware
+func (sh *strictHandler) VerifyEmail(w http.ResponseWriter, r *http.Request, params VerifyEmailParams) {
+	var request VerifyEmailRequestObject
+
+	request.Params = params
+	if strings.HasPrefix(r.Header.Get("Content-Type"), "application/json") {
+
+		var body VerifyEmailJSONRequestBody
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+			return
+		}
+		request.JSONBody = &body
+	}
+	if strings.HasPrefix(r.Header.Get("Content-Type"), "application/x-www-form-urlencoded") {
+		if err := r.ParseForm(); err != nil {
+			sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode formdata: %w", err))
+			return
+		}
+		var body VerifyEmailFormdataRequestBody
+		if err := runtime.BindForm(&body, r.Form, nil, nil); err != nil {
+			sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't bind formdata: %w", err))
+			return
+		}
+		request.FormdataBody = &body
+	}
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.VerifyEmail(ctx, request.(VerifyEmailRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "VerifyEmail")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(VerifyEmailResponseObject); ok {
+		if err := validResponse.VisitVerifyEmailResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// VerifyPasswordReset operation middleware
+func (sh *strictHandler) VerifyPasswordReset(w http.ResponseWriter, r *http.Request, params VerifyPasswordResetParams) {
+	var request VerifyPasswordResetRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.VerifyPasswordReset(ctx, request.(VerifyPasswordResetRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "VerifyPasswordReset")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(VerifyPasswordResetResponseObject); ok {
+		if err := validResponse.VisitVerifyPasswordResetResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
-
-	"H4sIAAAAAAAC/+xYUW/bNhD+KwI3YC9WlLTdi97SrBsyDMPgpFuBwDBo6SyzlUjlSNn1Av334UjJli0p",
-	"sRs7yYo8JRaPd7y777478o5FKsuVBGk0C++YjmaQcfvveRSB1tfqC8gh6FxJDfQ5R5UDGgFWiFuhsSEp",
-	"+h2DjlDkRijJwkqF51YHzCxzYCHTBoVMWFkOGMJtIRBiFt5sqhqVA/Yh4yIdwm0B2rQtA622TX7UgJ5b",
-	"e8igkyJLQ9Bg/uJaLxTGvRYjFUPb4IWKwZsq9MwMvDmgmIqI27WW/QGTsBjnlZ22qj9h4RV0/pXIQy7Y",
-	"I22pJYcoCn+oRMhHhW+qMOOGhawnngPW78vHvfyoDbScGEIitKG/L9OPAaOESZ5B99aftGcXdw3ASttW",
-	"LP5uAIsQd0yQIsQCITLjAkWHV8NLq6mW6lTSBVNyI1JZpuSY52L8AVHhrue3wl6F9lU6hTRv36yNC2kg",
-	"ASQXNnZ3K2t+6whCBlrzpPco9fKOBVqLj1byavIZIsMG7KufKL/6ODMmL4xI9YmLTmPVF1mu0CbcoW0t",
-	"bLFiZixkiTCzYnISqSzQ/F8l1fzScB1kKlJaq4AChJKnwYzLOAUMSEXgdJR0cg1RgcIsr6gLuHy8B46A",
-	"5wXpv2MT++vXOgG//3PNBq5n0Inc6jompN4pFnKq2qH8RUVFBtJYJFpQaSGTFDwtEukp6SFo4/FckEph",
-	"UtJ51SsxB9RO79nJ6ckpJVHlIGkxZG/tJxco6xcFA5XOITL+qnslYANMeLRnuoxZyC5XgtdVH8OqHVpF",
-	"b05PHW6lAWm38zxPq/IKPmuHQNdX23DXhe169G8VtIlSKXBpkbSJldKG8t2e9n5EmLKQ/RCsG31Qdfmg",
-	"VY61ibNjm/j506fjmmigmYU3mzi+GZUjEghSapE2KUp3ZN52UAsa5BkYQG1V0RZ2WwAuqfW6YkTIIJtY",
-	"8K8P3aKGau8MeGxFq83UKPzzhALRZA+DBdynbuSEQZv3Kl4+LoatgYHi01T31V8sFj5Rr19gCpKILX6k",
-	"/lX2ZZGm5SPr6j7rXaOshYjLhLV3Bca/UOqLgPvqFWGKoGfrgbdN/89WtO/+/0VbV6UqzL1lSes71eUU",
-	"VTbmadpVl2umHXVi75VsD0q2NM/6SDctvx7y8qIjvb+BpJ+wvo9pMBdujtriu4N4tHHNPDDtbekuN0nO",
-	"0h6FpmKV3hFkWK13Qz5yrNXoRU2O2rujPC0HvxbZfuSI1YW4nx7rK/Oug0vjsrfftHEQV7su+UeYPdom",
-	"yu3CaA8gZ64JPFlmiRqbLxF9+W08Vu2W5G9kgr5st1ztfD/bZrunj6h96FgGqyeiTm61LytLS9T1/e54",
-	"EX22GeN7mA0HPQXRyOCzlMO3O9r3qndgAuw3U5avqDwc0dTc7abcBxhnY7x9JZ0Xm157t8F5nZcCUxay",
-	"gOcimJ8FvGDlqPwvAAD//92TE3FFGwAA",
+	"H4sIAAAAAAAC/+xYUW/bNhD+KwI3YC9SlLQdMOgtzbohwzAMTroVCAyDkc4yW4lUjlRcL9B/H46UbNmS",
+	"XLuxk27Iky3xdMe7++67Ix9YrPJCSZBGs+iB6XgGObd/z+MYtL5Wn0COQBdKaqDXBaoC0AiwQtwKTQxJ",
+	"0XMCOkZRGKEki2oVnlv1mVkUwCKmDQqZsqryGcJdKRASFt2sqxpXPnuXc5GN4K4EbbqWgVa7Jt9rQM+t",
+	"+WyqMOeGRax5sX0HTopMj0CD+ZNrPVeYDG4hVgl0d3ChEvCmCj0zA+8eUExFzO1ax77PJMwnRW2nq+oP",
+	"mHslObQU+ZILdksbaskhCsvvKhXyqPH02bAv7/fyozHQcWIEqdCGfr9NP3xGCZM8h/5Pf9CeXdw1AEtt",
+	"G7H4qwUsQtwxQYqQCITYTEoUPV6NLq2mRqpXSR9MyY1Y5bmSE16IyTtEhbvu3wp7NdqX6RTSvH61Mi6k",
+	"gRSQXFj7ul9Z+11PEHLQmqeDW2mWdyzQRny8lFe3HyE2zGefg1QF9cuZMUVpRKZPXHRaq4HIC4U24Q5t",
+	"K2GLFTNjEUuFmZW3J7HKQ83/UVLdXxquw1zFSmsVUoBQ8iyccZlkgCGpCJ2OinauIS5RmMUVtQWXj7fA",
+	"EfC8JP0P7NY+/dIk4Le/r5nvmgjtyK2uYkLqnWIhp6obyp9VXOYgjUWiBZUWMs3A0yKVnpIegjYeLwSp",
+	"FCYjnVeDEveA2uk9Ozk9OaUkqgIkLUbstX3lAmX9omCg0gXEJli2sxRsgAmPdk+XCYvY5VLwum5sWPdH",
+	"q+jV6anDrTQg7ee8KLK6vMKP2iHQNdou3HVp2yD9rYN2q1QGXFokrWOlsqF8s6e97xGmLGLfhavOH9Zt",
+	"P+yUY2Pi7Ngmfvzw4bgmWmhm0c06jm/G1ZgEwoxapE2K0j2Ztx3UggZ5DgZQW1X0CbsrARfUel0xIuSQ",
+	"31rwrzbdoYb62xnwxIrWH1OjCM5TCkSbPQyWsE3d2AmDNm9VsnhcDDsDA8Wnre5zMJ/PA6LeoMQMJBFb",
+	"8kj9y+zLMsuqR9bVNut9s62FiMuEtXcFJrhQ6pOAbfWKMEXQs9UE3KX/ZyvaN//9om2qUpVma1nS+k51",
+	"OUWVT3iW9dXlimnHvdh7IduDki3NswHSSStohryi7EnvryDpEVbnMQ3mws1RG3x3EI/Wzp0Hpr0N3dU6",
+	"yVnao9DUrDI4gozq9X7Ix461Wr2ozVF7d5Sn5eCXItuPHLE+EA/TY3Nk3nVwaR329ps2DuJq3yH/CLNH",
+	"10S1WRjdAeTMNYHXpz+5P0+WYuLI9pXEUKJbt1a7ZfsrKWEo7R1Xey/SNmmvFdoniqi98ViEy7uiXpK1",
+	"VywLy9jNQe94EX22YeP/MCT6AwXRyuCzlMPXOzp0vXdgJhw2U1UvqDwc0TTc7cbdLzDO2pz7QjrfbHrt",
+	"IQfvm7yUmLGIhbwQ4f1ZyEtWjat/AwAA//8Kya5BXxsAAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

@@ -25,6 +25,7 @@ paths:
         required: true
       responses:
         201: { }
+        308: { }
         5XX: 
           content:
             application/json:
@@ -323,6 +324,7 @@ components:
       properties:
         email:
           type: string
+          format: email
           description: User email
     VerificationCodeRequest:
       required:

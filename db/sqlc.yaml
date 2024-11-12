@@ -9,15 +9,21 @@ sql:
         out: "../gen/go/db/postgres"
         sql_package: "pgx/v5"
         overrides:
-          - db_type: "boolean"
+          - db_type: "pg_catalog.bool"
+            nullable: true
             go_type:
-              import: ""
               type: "bool"
           - db_type: "text"
+            nullable: true
             go_type:
-              import: ""
               type: "string"
           - db_type: "timestamptz"
             go_type:
               import: "time"
               type: "Time"
+          - db_type: "timestamptz"
+            nullable: true
+            go_type:
+              import: "time"
+              type: "Time"
+              pointer: true

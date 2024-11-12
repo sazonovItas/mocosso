@@ -18,5 +18,8 @@ insert into access (
 ) returning *;
 
 -- name: DeleteUserAccess :exec
+delete from access where id = $1;
+
+-- name: DeleteUserAccessByUserIDAndDeviceID :exec
 delete from access
-where id = $1;
+where user_id = $1 and device_id = $2;

@@ -6,8 +6,6 @@ package postgresdb
 
 import (
 	"time"
-
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Access struct {
@@ -33,7 +31,7 @@ type Device struct {
 type Role struct {
 	ID          int32
 	Name        string
-	Description pgtype.Text
+	Description string
 }
 
 type RoleScope struct {
@@ -44,7 +42,7 @@ type RoleScope struct {
 type Scope struct {
 	ID          int32
 	Name        string
-	Description pgtype.Text
+	Description string
 }
 
 type UserAccount struct {
@@ -52,11 +50,11 @@ type UserAccount struct {
 	Email        string
 	Username     string
 	PasswordHash string
-	Avatar       pgtype.Text
-	IsVerified   pgtype.Bool
+	Avatar       string
+	IsVerified   bool
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
-	DeletedAt    pgtype.Timestamptz
+	DeletedAt    *time.Time
 }
 
 type UserRole struct {

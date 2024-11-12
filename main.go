@@ -1,13 +1,12 @@
 package main
 
 import (
-	"context"
+	"fmt"
 	"os"
 
 	goversion "github.com/caarlos0/go-version"
 	cmd "github.com/sazonovItas/mocosso/cmd/sso"
 	"github.com/sazonovItas/mocosso/pkg/logger"
-	"go.uber.org/zap"
 )
 
 var (
@@ -20,11 +19,9 @@ func main() {
 	defer logger.Sync()
 
 	exit := func(code int) {
-		logger.ErrorContext(
-			context.Background(),
-			"failed to execute command",
-			zap.Int("code", code),
-		)
+		if code != 0 {
+			panic(fmt.Errorf("exit with code %d", code))
+		}
 	}
 
 	info := buildVersion(version, commit, date)

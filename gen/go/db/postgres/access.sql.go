@@ -46,12 +46,26 @@ func (q *Queries) CreateUserAccess(ctx context.Context, arg CreateUserAccessPara
 }
 
 const deleteUserAccess = `-- name: DeleteUserAccess :exec
-delete from access
-where id = $1
+delete from access where id = $1
 `
 
 func (q *Queries) DeleteUserAccess(ctx context.Context, id int64) error {
 	_, err := q.db.Exec(ctx, deleteUserAccess, id)
+	return err
+}
+
+const deleteUserAccessByUserIDAndDeviceID = `-- name: DeleteUserAccessByUserIDAndDeviceID :exec
+delete from access
+where user_id = $1 and device_id = $2
+`
+
+type DeleteUserAccessByUserIDAndDeviceIDParams struct {
+	UserID   int64
+	DeviceID int64
+}
+
+func (q *Queries) DeleteUserAccessByUserIDAndDeviceID(ctx context.Context, arg DeleteUserAccessByUserIDAndDeviceIDParams) error {
+	_, err := q.db.Exec(ctx, deleteUserAccessByUserIDAndDeviceID, arg.UserID, arg.DeviceID)
 	return err
 }
 

@@ -4,15 +4,15 @@ CREATE SCHEMA IF NOT EXISTS sso;
 SET SEARCH_PATH TO sso, PUBLIC;
 
 CREATE TABLE IF NOT EXISTS user_account (
-  id            bigserial     NOT NULL,
-  email         varchar(255)  NOT NULL UNIQUE,
-  username      varchar(70)   NOT NULL UNIQUE, 
-  password_hash varchar(255)  NOT NULL,
-  avatar        text          DEFAULT NULL,
-  is_verified   boolean       DEFAULT FALSE,
-  created_at    timestamptz   NOT NULL DEFAULT NOW(),
-  updated_at    timestamptz   NOT NULL DEFAULT NOW(),
-  deleted_at    timestamptz   DEFAULT NULL,
+  id            bigserial       NOT NULL,
+  email         varchar(255)    NOT NULL UNIQUE,
+  username      varchar(70)     NOT NULL UNIQUE, 
+  password_hash varchar(255)    NOT NULL,
+  avatar        text            DEFAULT NULL,
+  is_verified   pg_catalog.bool DEFAULT FALSE,
+  created_at    timestamptz     NOT NULL DEFAULT NOW(),
+  updated_at    timestamptz     NOT NULL DEFAULT NOW(),
+  deleted_at    timestamptz     DEFAULT NULL,
   PRIMARY KEY (id)
 );
 

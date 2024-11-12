@@ -3,6 +3,7 @@ output: ../../../../gen/go/rest/v1/auth/auth.gen.go
 generate:
   models: true
   chi-server: true
+  strict-server: true
   client: true
   embedded-spec: true
 output-options:
